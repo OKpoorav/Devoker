@@ -4,6 +4,7 @@ type Hand struct {
 	cards     []Card
 	rankCount map[Rank]int
 	suitCount map[Suit]int
+	handRank  HandRank
 }
 
 type HandRank int
@@ -47,6 +48,23 @@ func (h *Hand) countSuits() {
 	h.suitCount = res
 }
 
-func isStraigth(cards []Card) {
-
+func (h *Hand) isStraight() (Rank, bool) {
+	const window = 5
+	for top := A; top >= FE; top-- {
+		found := true
+		for r := top; r >  top-window; r-- {
+			check := r
+			if r == 1 { 
+				check = A
+			}
+			if h.rankCount[check] == 0 {
+				found = false
+				break
+			}
+		}
+		if found {
+			return top, true
+		}
+	}
+	return 0, false
 }
