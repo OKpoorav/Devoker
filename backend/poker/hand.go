@@ -1,5 +1,7 @@
 package poker
 
+import "slices"
+
 type Hand struct {
 	cards     []Card
 	rankCount map[Rank]int
@@ -52,9 +54,9 @@ func (h *Hand) isStraight() (Rank, bool) {
 	const window = 5
 	for top := A; top >= FE; top-- {
 		found := true
-		for r := top; r >  top-window; r-- {
+		for r := top; r > top-window; r-- {
 			check := r
-			if r == 1 { 
+			if r == 1 {
 				check = A
 			}
 			if h.rankCount[check] == 0 {
@@ -67,4 +69,21 @@ func (h *Hand) isStraight() (Rank, bool) {
 		}
 	}
 	return 0, false
+}
+
+func (h *Hand) isFlush() ([]Card, bool) {
+	for suit, count := range h.suitCount {
+		if count < 5 {
+			continue
+		}
+		var flush []Card
+		for _, c := range h.cards {
+			if c.Suit == suit {
+				flush = append(flush, c)
+			}
+		}
+		slices.SortFunc(flush, func(a, b Card) int { return int(b.Value - a.Value) })
+		return flush[:5], true
+	}
+	return nil, false
 }
