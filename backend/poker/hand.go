@@ -87,3 +87,57 @@ func (h *Hand) isFlush() ([]Card, bool) {
 	}
 	return nil, false
 }
+
+type group struct {
+	rank  Rank
+	count int
+}
+
+// groups lists each rank with how often it appears: biggest count first, then highest rank.
+// K K 5 5 5 9 2 -> [{5 3} {K 2} {9 1} {2 1}]
+func (h *Hand) groups() []group {
+	var gs []group
+	for r, n := range h.rankCount {
+		gs = append(gs, group{rank: r, count: n})
+	}
+	slices.SortFunc(gs, func(a, b group) int {
+		if a.count != b.count {
+			return b.count - a.count
+		}
+		return int(b.rank - a.rank)
+	})
+	return gs
+}
+
+// countHand classifies the hands decided by rank counts and returns the ranks that
+// break ties, most important first. Example: K K 9 9 A -> TwoPair, [K 9 A].
+func (h *Hand) countHand() (HandRank, []Rank) {
+	gs := h.groups()
+
+	kickers := func(n int, used ...Rank) []Rank {
+		var ks []Rank
+		for _, g := range gs { // gs has one entry per rank, so no duplicates
+			if !slices.Contains(used, g.rank) {
+				ks = append(ks, g.rank)
+			}
+		}
+		slices.SortFunc(ks, func(a, b Rank) int { return int(b - a) })
+		return ks[:min(n, len(ks))]
+	}
+
+	first := gs[0]
+	switch {
+	case first.count == 4:
+		return FourOfAKind, append([]Rank{first.rank}, kickers(1, first.rank)...)
+	case first.count == 3 && len(gs) > 1 && gs[1].count >= 2:
+		return FullHouse, []Rank{first.rank, gs[1].rank}
+	case first.count == 3:
+		return ThreeOfAKind, append([]Rank{first.rank}, kickers(2, first.rank)...)
+	case first.count == 2 && len(gs) > 1 && gs[1].count == 2:
+		return TwoPair, append([]Rank{first.rank, gs[1].rank}, kickers(1, first.rank, gs[1].rank)...)
+	case first.count == 2:
+		return OnePair, append([]Rank{first.rank}, kickers(3, first.rank)...)
+	default:
+		return HighCard, kickers(5)
+	}
+}
