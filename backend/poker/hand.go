@@ -71,6 +71,8 @@ func (h *Hand) isStraight() (Rank, bool) {
 	return 0, false
 }
 
+// isFlush returns every card of the flush suit (5 to 7), highest first. All of them, not
+// just the top 5, because a straight flush can use the lower ones (Ah 9h 8h 7h 6h 5h).
 func (h *Hand) isFlush() ([]Card, bool) {
 	for suit, count := range h.suitCount {
 		if count < 5 {
@@ -83,7 +85,7 @@ func (h *Hand) isFlush() ([]Card, bool) {
 			}
 		}
 		slices.SortFunc(flush, func(a, b Card) int { return int(b.Value - a.Value) })
-		return flush[:5], true
+		return flush, true
 	}
 	return nil, false
 }
