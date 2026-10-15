@@ -1,8 +1,9 @@
 package poker
 
 import (
+	"crypto/rand"
 	"errors"
-	"math/rand"
+	"math/big"
 )
 
 type Deck struct {
@@ -28,10 +29,13 @@ func NewDeck() *Deck {
 
 	return deck
 }
+
+// Shuffle uses crypto/rand: with math/rand, someone who works out the generator's state could predict the cards.
 func (deck *Deck) Shuffle() {
-	rand.Shuffle(len(deck.cards), func(i, j int) {
-		deck.cards[i], deck.cards[j] = deck.cards[j], deck.cards[i]
-	})
+	for i := len(deck.cards) - 1; i > 0; i-- {
+		j, _ := rand.Int(rand.Reader, big.NewInt(int64(i+1))) // crypto/rand.Reader never fails since Go 1.24
+		deck.cards[i], deck.cards[j.Int64()] = deck.cards[j.Int64()], deck.cards[i]
+	}
 }
 
 func (deck *Deck) Deal(n int) ([]Card, error) {
