@@ -6,3 +6,20 @@ output "ecr_repository_urls" {
 output "artifacts_bucket" {
   value = aws_s3_bucket.artifacts.bucket
 }
+
+output "cluster_name" {
+  value = aws_eks_cluster.main.name
+}
+
+output "kubeconfig_command" {
+  description = "Run this after apply, then `kubectl get nodes`."
+  value       = "aws eks update-kubeconfig --region ${var.aws_region} --name ${aws_eks_cluster.main.name}"
+}
+
+output "vpc_id" {
+  value = aws_vpc.main.id
+}
+
+output "public_subnet_ids" {
+  value = aws_subnet.public[*].id
+}

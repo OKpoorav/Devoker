@@ -4,3 +4,20 @@
 # cannot be deleted for 7+ days, which is wrong for a lab that is destroyed the same day.
 # Revisit if the bucket ever holds real Terraform state for a long-lived environment.
 AWS-0132
+
+# EKS secrets are not envelope-encrypted with a customer-managed KMS key. The key costs ~$1/month
+# and lingers 7+ days after destroy, which is wrong for a cluster that lives about an hour.
+# Revisit before the cluster holds real Kubernetes Secrets or outlives a lab session.
+AWS-0039
+
+# The EKS API endpoint is public so kubectl on the operator's laptop can reach it without a VPN or bastion.
+# Revisit when a VPN or bastion exists; then set endpoint_public_access = false.
+AWS-0040
+
+# public_access_cidrs defaults to 0.0.0.0/0 because the operator's IP changes; the API still requires IAM auth.
+# Narrow it via cluster_public_access_cidrs in terraform.tfvars; revisit for any long-lived cluster.
+AWS-0041
+
+# Subnets hand out public IPs because the nodes sit in public subnets instead of paying for a NAT gateway
+# (~$33/month). Revisit when the cluster outlives a lab session: add private subnets plus NAT.
+AWS-0164

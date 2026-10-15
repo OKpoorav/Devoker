@@ -1,0 +1,6 @@
+# Copy to terraform.tfvars and edit. terraform.tfvars is gitignored; never put credentials here.
+aws_region         = "us-east-1"
+project            = "devoker"
+node_instance_type = "t3.small"
+node_count         = 2
+# cluster_public_access_cidrs = ["203.0.113.7/32"] # your laptop's public IP
