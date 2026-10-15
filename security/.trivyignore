@@ -1,0 +1,6 @@
+# One finding ID per line, each with the reason it is accepted.
+
+# S3 bucket uses SSE-S3 (AES256), not a customer-managed KMS key. A KMS key costs ~$1/month and
+# cannot be deleted for 7+ days, which is wrong for a lab that is destroyed the same day.
+# Revisit if the bucket ever holds real Terraform state for a long-lived environment.
+AWS-0132
