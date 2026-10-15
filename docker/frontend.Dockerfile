@@ -1,4 +1,5 @@
-FROM node:22-alpine AS build
+# The built site is plain files, the same for every CPU: build it once on the runner's platform.
+FROM --platform=$BUILDPLATFORM node:22-alpine AS build
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
