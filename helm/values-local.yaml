@@ -1,0 +1,5 @@
+# Images built locally and loaded with `minikube image load` (no registry needed).
+backend:
+  image: { repository: devoker-backend, tag: dev }
+frontend:
+  image: { repository: devoker-frontend, tag: dev }

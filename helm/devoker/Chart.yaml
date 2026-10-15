@@ -1,0 +1,6 @@
+apiVersion: v2
+name: devoker
+description: Texas Hold'em with friends (Go backend + React/nginx frontend)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

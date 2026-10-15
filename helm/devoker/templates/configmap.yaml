@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devoker-game
+  labels: {{- include "devoker.labels" . | nindent 4 }}
+data:
+  STARTING_CHIPS: {{ .Values.game.startingChips | quote }}
+  SMALL_BLIND: {{ .Values.game.smallBlind | quote }}
+  BIG_BLIND: {{ .Values.game.bigBlind | quote }}

@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: frontend-logs
+  labels: {{- include "devoker.labels" . | nindent 4 }}
+spec:
+  # RWO is per node: every frontend replica can share it on single-node minikube only.
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests: { storage: {{ .Values.frontend.logStorage }} }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels: {{- include "devoker.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.frontend.autoscaling.enabled }}
+  replicas: 2
+  {{- end }}
+  selector:
+    matchLabels: { app: frontend }
+  template:
+    metadata:
+      labels: { app: frontend }
+    spec:
+      {{- with .Values.imagePullSecret }}
+      imagePullSecrets: [{ name: {{ . }} }]
+      {{- end }}
+      securityContext: { runAsNonRoot: true, fsGroup: 101 }
+      containers:
+        - name: frontend
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports: [{ name: http, containerPort: 8080 }]
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 5
+          livenessProbe:
+            httpGet: { path: /, port: http }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources: {{- toYaml .Values.frontend.resources | nindent 12 }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: logs, mountPath: /var/log/devoker }
+            - { name: tmp, mountPath: /tmp } # nginx pid file and proxy temp files
+      volumes:
+        - name: logs
+          persistentVolumeClaim: { claimName: frontend-logs }
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  labels: {{- include "devoker.labels" . | nindent 4 }}
+spec:
+  selector: { app: frontend }
+  ports: [{ name: http, port: 80, targetPort: http }]
+{{- with .Values.frontend.autoscaling }}
+{{- if .enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: frontend
+  labels: {{- include "devoker.labels" $ | nindent 4 }}
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: frontend }
+  minReplicas: {{ .minReplicas }}
+  maxReplicas: {{ .maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: {{ .targetCPU }} }
+{{- end }}
+{{- end }}
