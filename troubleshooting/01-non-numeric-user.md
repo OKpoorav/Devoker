@@ -19,10 +19,12 @@ non-numeric user (nonroot), cannot verify user is non-root
 kubelet checks that by UID. A name can't be checked without reading `/etc/passwd` inside the image,
 so the kubelet refuses to start the container.
 
-**Fix.** `docker/backend.Dockerfile` now says `USER 65532:65532` (the same user distroless calls
+**Fix.** The Go backend's Dockerfile (now `legacy-go-backend/Dockerfile`) says `USER 65532:65532` (the same user distroless calls
 `nonroot`). Rebuilt, reloaded into minikube, deleted the pod.
 
 **Verify.** `deployment "backend" successfully rolled out`; `scripts/smoke.py` played a hand.
 
 **Prevent.** Always use a numeric `USER` in images that run under `runAsNonRoot`. Docker alone
 never shows this error, so only a Kubernetes run catches it: the cluster deploy is the test.
+
+The Python backend (`backend/Dockerfile`) follows the same rule with `USER 10001:10001`.

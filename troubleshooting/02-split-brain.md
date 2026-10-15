@@ -44,3 +44,7 @@ is reverted automatically within minutes.
 
 **Prevent.** `replicas` is deliberately not a Helm value, with a comment explaining why. The real
 fix, if the backend must scale, is moving room state to Redis or a database.
+
+**Update: fixed at the root.** The backend was rewritten in Python with every room stored in
+PostgreSQL and changed under a row lock (`SELECT ... FOR UPDATE`). The chart now runs 2 backend
+replicas on purpose. The same smoke test through the Ingress passed 10 out of 10 with both replicas serving.

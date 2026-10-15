@@ -37,3 +37,6 @@ with the old pod still serving. Here it is a full outage.
 **Prevent.** This is the cost of `Recreate`, which the in-memory state forces. Mitigations: a CI
 step that renders the chart and checks probe paths against the app's routes, or a post-deploy smoke
 test (`scripts/smoke.py`) that fails the pipeline.
+
+**Update.** With state in PostgreSQL, the backend uses rolling updates. The same bad probe now
+leaves the new pod unready while the old pods keep serving, and `kubectl rollout status` reports the stuck rollout.

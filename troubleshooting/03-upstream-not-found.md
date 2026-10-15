@@ -1,7 +1,7 @@
 # 3. New frontend pods crash-loop, then requests hang
 
 **Planted.** `kubectl -n devoker delete svc backend`, then `kubectl -n devoker rollout restart deploy/frontend`
-(the same failure as a typo in the `proxy_pass` host in `docker/nginx.conf`).
+(the same failure as a typo in the `proxy_pass` host in `frontend/nginx.conf`).
 
 **Symptom.** The site still loaded (`site: 200`), but the new frontend pods never became Ready:
 
