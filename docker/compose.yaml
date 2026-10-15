@@ -1,0 +1,10 @@
+services:
+  backend:
+    build: { context: .., dockerfile: docker/backend.Dockerfile }
+    environment:
+      SMALL_BLIND: "10"
+      BIG_BLIND: "20"
+  frontend:
+    build: { context: .., dockerfile: docker/frontend.Dockerfile }
+    ports: ["8080:8080"]
+    depends_on: [backend]
