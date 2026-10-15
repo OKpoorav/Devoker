@@ -1,14 +1,14 @@
 backend:
   image:
     repository: ghcr.io/okpoorav/devoker-backend
-    tag: 29b19af145f38122ac93c56d52688fd1c0a8d740
+    tag: 18c9695a108d02c014ad44746b5379b1ce216aca
   resources:
     requests: {cpu: 50m, memory: 64Mi}
     limits: {cpu: 500m, memory: 256Mi}
 frontend:
   image:
     repository: ghcr.io/okpoorav/devoker-frontend
-    tag: 29b19af145f38122ac93c56d52688fd1c0a8d740
+    tag: 18c9695a108d02c014ad44746b5379b1ce216aca
   resources:
     requests: {cpu: 20m, memory: 32Mi}
     limits: {cpu: 200m, memory: 128Mi}
