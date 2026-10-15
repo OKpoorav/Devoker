@@ -5,3 +5,9 @@ dist/
 *.tfstate.*
 tfplan
 .DS_Store
+*.tfvars
+!*.tfvars.example
+.venv/
+__pycache__/
+.pytest_cache/
+.env
