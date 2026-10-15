@@ -1,26 +1,24 @@
 backend:
   image:
     repository: ghcr.io/okpoorav/devoker-backend
-    tag: dev
+    tag: a8a0c5e63a23f94600a7b02d3faa67498c06fab5
   replicas: 2 # safe: all game state is in Postgres, so any replica can serve any player
   resources:
-    requests: { cpu: 50m, memory: 128Mi }
-    limits: { cpu: 500m, memory: 256Mi }
-
+    requests: {cpu: 50m, memory: 128Mi}
+    limits: {cpu: 500m, memory: 256Mi}
 frontend:
   image:
     repository: ghcr.io/okpoorav/devoker-frontend
-    tag: dev
+    tag: a8a0c5e63a23f94600a7b02d3faa67498c06fab5
   resources:
-    requests: { cpu: 20m, memory: 32Mi }
-    limits: { cpu: 200m, memory: 128Mi }
+    requests: {cpu: 20m, memory: 32Mi}
+    limits: {cpu: 200m, memory: 128Mi}
   autoscaling:
     enabled: true
     minReplicas: 2
     maxReplicas: 5
     targetCPU: 50
   logStorage: 1Gi
-
 postgres:
   image: postgres:16-alpine
   database: devoker
@@ -29,18 +27,14 @@ postgres:
   # Created out of band, never committed (see README):
   #   kubectl -n devoker create secret generic devoker-db --from-literal=password=<random>
   existingSecret: devoker-db
-
 game:
   startingChips: 1000
   smallBlind: 10
   bigBlind: 20
-
 ingress:
   enabled: true
   host: devoker.local
-
 monitoring:
   # Needs the Prometheus Operator CRDs (kube-prometheus-stack). Turn off on a cluster without them.
   enabled: true
-
 imagePullPolicy: IfNotPresent
