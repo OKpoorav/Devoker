@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devoker-game
+  namespace: devoker
+data:
+  STARTING_CHIPS: "1000"
+  SMALL_BLIND: "10"
+  BIG_BLIND: "20"
