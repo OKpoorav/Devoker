@@ -1,8 +1,2 @@
-.git
-**/node_modules
-**/dist
-terraform
-helm
-kubernetes
-monitoring
-troubleshooting
+node_modules
+dist

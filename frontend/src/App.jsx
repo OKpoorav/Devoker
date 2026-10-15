@@ -4,9 +4,9 @@ const SUITS = { Hearts: '♥', Diamonds: '♦', Clubs: '♣', Spades: '♠' }
 const RANKS = { 14: 'A', 13: 'K', 12: 'Q', 11: 'J', 10: '10' }
 const RANK_NAMES = { 14: 'Ace', 13: 'King', 12: 'Queen', 11: 'Jack' }
 
-async function post(path, body) {
+async function api(method, path, body) {
   const res = await fetch(path, {
-    method: 'POST',
+    method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
@@ -46,7 +46,7 @@ function Lobby({ onJoin }) {
 
   const enter = async (path) => {
     try {
-      onJoin(await post(path, { name }))
+      onJoin(await api('POST', path, { name }))
     } catch (e) {
       setError(e.message)
     }
@@ -91,27 +91,35 @@ function Room({ session, onLeave }) {
       const v = JSON.parse(e.data)
       setView(v)
       setError('')
-      if (v.status === 'rejected') events.close()
+      if (v.status === 'rejected' || v.status === 'closed') events.close()
     }
     events.onerror = () => setError('Connection lost. Reconnecting… (if the server restarted, leave and start a new table)')
     return () => events.close()
   }, [room, token])
 
-  const send = (path, body = {}) =>
-    post(`/api/rooms/${room}/${path}`, { token, ...body }).catch((e) => setError(e.message))
+  const send = (path, body = {}, method = 'POST') =>
+    api(method, `/api/rooms/${room}/${path}`, { token, ...body }).catch((e) => setError(e.message))
 
-  if (view?.status === 'pending' || view?.status === 'rejected') {
-    const rejected = view.status === 'rejected'
+  // Gives the seat back (or cancels the request) when possible; mid-hand the seat simply waits.
+  const leave = () => {
+    api('DELETE', `/api/rooms/${room}/seat`, { token }).catch(() => {})
+    onLeave()
+  }
+  const closeTable = () => api('DELETE', `/api/rooms/${room}`, { token }).then(onLeave, (e) => setError(e.message))
+
+  if (view && view.status !== 'seated') {
+    const screens = {
+      pending: ['Knock knock', `Waiting for the host of table ${room} to let you in…`, 'Cancel'],
+      rejected: ['Not this time', `The host of table ${room} declined your request.`, 'Back'],
+      closed: ['Table closed', `The host closed table ${room}.`, 'Back'],
+    }
+    const [title, text, button] = screens[view.status]
     return (
       <main className="lobby enter" key={view.status}>
-        <h1>{rejected ? 'Not this time' : 'Knock knock'}</h1>
-        <p className="tagline">
-          {rejected
-            ? `The host of table ${room} declined your request.`
-            : `Waiting for the host of table ${room} to let you in…`}
-        </p>
-        <button className="secondary" onClick={onLeave}>
-          {rejected ? 'Back' : 'Cancel'}
+        <h1>{title}</h1>
+        <p className="tagline">{text}</p>
+        <button className="secondary" onClick={view.status === 'pending' ? leave : onLeave}>
+          {button}
         </button>
       </main>
     )
@@ -127,10 +135,10 @@ function Room({ session, onLeave }) {
     )
   }
 
-  return <Table view={view} room={room} send={send} error={error} onLeave={onLeave} />
+  return <Table view={view} room={room} send={send} error={error} onLeave={view.isOwner ? onLeave : leave} onClose={closeTable} />
 }
 
-function Table({ view, room, send, error, onLeave }) {
+function Table({ view, room, send, error, onLeave, onClose }) {
   const [raiseTo, setRaiseTo] = useState(view.minRaiseTo)
   const [lastMin, setLastMin] = useState(view.minRaiseTo)
   if (view.minRaiseTo !== lastMin) {
@@ -153,7 +161,10 @@ function Table({ view, room, send, error, onLeave }) {
         <span>
           Table <b className="code">{room}</b> · blinds {view.smallBlind}/{view.bigBlind}
         </span>
-        <button className="link" onClick={onLeave}>Leave</button>
+        <span>
+          {view.isOwner && <button className="link" onClick={onClose}>Close table</button>}
+          <button className="link" onClick={onLeave}>Leave</button>
+        </span>
       </header>
 
       {view.isOwner && view.requests.length > 0 && (
@@ -164,8 +175,8 @@ function Table({ view, room, send, error, onLeave }) {
                 <b>{r.name}</b> {r.kind === 'join' ? 'wants to join' : `wants to buy back in for ${view.startChips}`}
               </span>
               <span className="request-actions">
-                <button className="secondary" onClick={() => send(`requests/${r.id}`, { approve: false })}>Decline</button>
-                <button onClick={() => send(`requests/${r.id}`, { approve: true })}>Approve</button>
+                <button className="secondary" onClick={() => send(`requests/${r.id}`, { approve: false }, 'PUT')}>Decline</button>
+                <button onClick={() => send(`requests/${r.id}`, { approve: true }, 'PUT')}>Approve</button>
               </span>
             </div>
           ))}

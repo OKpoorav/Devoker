@@ -3,12 +3,13 @@
 deals, and whoever acts first folds. Usage: smoke.py [base_url] [host_header]"""
 import json, sys, urllib.request
 
-BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:8080"
+BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:3000"
 HOST = sys.argv[2] if len(sys.argv) > 2 else None
 
 
 def call(method, path, body=None):
-    req = urllib.request.Request(BASE + path, method=method, data=json.dumps(body).encode() if body else None)
+    req = urllib.request.Request(BASE + path, method=method, data=json.dumps(body).encode() if body else None,
+                                 headers={"Content-Type": "application/json"})
     if HOST:
         req.add_header("Host", HOST)
     return urllib.request.urlopen(req, timeout=5)
@@ -33,7 +34,7 @@ guest = post(f"/api/rooms/{room}/join", {"name": "guest"})
 assert view(room, guest["token"])["status"] == "pending", "guest waits for approval"
 
 req = view(room, host["token"])["requests"][0]
-post(f"/api/rooms/{room}/requests/{req['id']}", {"token": host["token"], "approve": True})
+call("PUT", f"/api/rooms/{room}/requests/{req['id']}", {"token": host["token"], "approve": True}).close()
 assert view(room, guest["token"])["status"] == "seated", "guest seated after approval"
 
 post(f"/api/rooms/{room}/start", {"token": host["token"]})

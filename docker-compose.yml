@@ -1,10 +1,29 @@
 services:
-  backend:
-    build: { context: .., dockerfile: docker/backend.Dockerfile }
+  postgres:
+    image: postgres:16-alpine
     environment:
+      POSTGRES_DB: devoker
+      POSTGRES_USER: devoker
+      POSTGRES_PASSWORD: devoker # local development only
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U devoker -d devoker"]
+      interval: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://devoker:devoker@postgres:5432/devoker
       SMALL_BLIND: "10"
       BIG_BLIND: "20"
+    depends_on:
+      postgres: { condition: service_healthy }
+
   frontend:
-    build: { context: .., dockerfile: docker/frontend.Dockerfile }
-    ports: ["8080:8080"]
+    build: ./frontend
+    ports: ["3000:8080"]
     depends_on: [backend]
+
+volumes:
+  pgdata:
