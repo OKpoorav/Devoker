@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: devoker
+  namespace: monitoring
+spec:
+  groups:
+    - name: devoker
+      rules:
+        # Every game lives in the backend's memory, so any restart ends all tables.
+        - alert: DevokerBackendRestarted
+          expr: increase(kube_pod_container_status_restarts_total{namespace="devoker", container="backend"}[10m]) > 0
+          labels: { severity: critical }
+          annotations:
+            summary: "Devoker backend restarted: every game in progress was lost"
+        - alert: DevokerFrontendAtMaxReplicas
+          expr: kube_horizontalpodautoscaler_status_current_replicas{namespace="devoker"} >= kube_horizontalpodautoscaler_spec_max_replicas{namespace="devoker"}
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "Frontend HPA has been at max replicas for 10 minutes"
