@@ -7,12 +7,12 @@ spec:
   groups:
     - name: devoker
       rules:
-        # Every game lives in the backend's memory, so any restart ends all tables.
+        # Games survive a restart (state is in Postgres), but the pod's players lose their stream until they reconnect.
         - alert: DevokerBackendRestarted
           expr: increase(kube_pod_container_status_restarts_total{namespace="devoker", container="backend"}[10m]) > 0
-          labels: { severity: critical }
+          labels: { severity: warning }
           annotations:
-            summary: "Devoker backend restarted: every game in progress was lost"
+            summary: "Devoker backend restarted: its players' live streams dropped"
         - alert: DevokerFrontendAtMaxReplicas
           expr: kube_horizontalpodautoscaler_status_current_replicas{namespace="devoker"} >= kube_horizontalpodautoscaler_spec_max_replicas{namespace="devoker"}
           for: 10m

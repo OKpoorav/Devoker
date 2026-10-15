@@ -24,9 +24,6 @@ spec:
     metadata:
       labels: { app: frontend }
     spec:
-      {{- with .Values.imagePullSecret }}
-      imagePullSecrets: [{ name: {{ . }} }]
-      {{- end }}
       securityContext: { runAsNonRoot: true, fsGroup: 101 }
       containers:
         - name: frontend

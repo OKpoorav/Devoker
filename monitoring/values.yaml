@@ -5,10 +5,15 @@ alertmanager:
 prometheus:
   prometheusSpec:
     retention: 2d
-    # Pick up PrometheusRules that don't carry this release's label (monitoring/devoker-alerts.yaml).
+    # Pick up rules and ServiceMonitors that don't carry this release's label, from any namespace
+    # (monitoring/devoker-alerts.yaml, and the ServiceMonitor in the devoker Helm chart).
     ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
     resources:
       requests: { cpu: 100m, memory: 400Mi }
 grafana:
+  sidecar:
+    dashboards:
+      searchNamespace: ALL # load the devoker chart's dashboard ConfigMap from its own namespace
   resources:
     requests: { cpu: 50m, memory: 128Mi }
