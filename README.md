@@ -189,13 +189,16 @@ helm rollback devoker <revision> -n devoker
            └─ secrets        gitleaks over the full history
                                         │ all five must pass
                      build-scan-push   matrix: backend, frontend
-                       docker build → trivy image gate → push ghcr.io/okpoorav/devoker-*:<sha>
+                       docker build → trivy image gate → push ghcr.io/okpoorav/devoker-*:<sha> (amd64 + arm64)
                                         │ main only
                      deploy            yq sets both tags in helm/devoker/values.yaml → commit → push
 ```
 
 - **Images are tagged by commit SHA**, so the running version is traceable and Argo sees a change on every deploy.
 - **Images are scanned before they're pushed**, so a vulnerable image never reaches the registry.
+- **Images are multi-arch** (amd64 for runners and cloud clusters, arm64 for Apple Silicon minikube).
+  The first amd64-only build would have crashed on the ARM minikube with `exec format error`. Go
+  cross-compiles natively (`$BUILDPLATFORM`, `TARGETARCH`), and the React build runs once because its output doesn't depend on CPU.
 - **Permissions are least-privilege per job.** Only build gets `packages: write`; only deploy gets `contents: write`.
 - **The deploy commit doesn't loop.** It includes `[skip ci]`, and the trigger ignores `helm/devoker/values.yaml`.
 - **A `concurrency` group** stops two pushes racing to commit tags.
@@ -250,8 +253,8 @@ longer has), `selfHeal` (undo manual edits) and `CreateNamespace`. CI can't reac
 so it never deploys directly. It commits the new tag, and Argo pulls it (it polls every ~3 minutes).
 
 - **Roll back** with `git revert` of the deploy commit, not `helm rollback`. Git stays the record of what runs.
-- **Drift test:** `kubectl -n devoker scale deploy/backend --replicas=2`. Argo returns it to 1, which is
-  also the fix for [incident 2](troubleshooting/02-split-brain.md).
+- **Drift test:** `kubectl -n devoker scale deploy/backend --replicas=2`. Argo returned it to 1 within
+  2 seconds, which is also the fix for [incident 2](troubleshooting/02-split-brain.md).
 
 ## Monitoring
 
