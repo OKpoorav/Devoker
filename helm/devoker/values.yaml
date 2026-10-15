@@ -1,34 +1,30 @@
 backend:
   image:
     repository: ghcr.io/okpoorav/devoker-backend
-    tag: dev
+    tag: 29b19af145f38122ac93c56d52688fd1c0a8d740
   resources:
-    requests: { cpu: 50m, memory: 64Mi }
-    limits: { cpu: 500m, memory: 256Mi }
-
+    requests: {cpu: 50m, memory: 64Mi}
+    limits: {cpu: 500m, memory: 256Mi}
 frontend:
   image:
     repository: ghcr.io/okpoorav/devoker-frontend
-    tag: dev
+    tag: 29b19af145f38122ac93c56d52688fd1c0a8d740
   resources:
-    requests: { cpu: 20m, memory: 32Mi }
-    limits: { cpu: 200m, memory: 128Mi }
+    requests: {cpu: 20m, memory: 32Mi}
+    limits: {cpu: 200m, memory: 128Mi}
   autoscaling:
     enabled: true
     minReplicas: 2
     maxReplicas: 5
     targetCPU: 50
   logStorage: 1Gi
-
 game:
   startingChips: 1000
   smallBlind: 10
   bigBlind: 20
-
 ingress:
   enabled: true
   host: devoker.local
-
 imagePullPolicy: IfNotPresent
 # Name only. The Secret itself is created out of band with kubectl (see README); never commit it.
 imagePullSecret: ghcr
