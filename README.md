@@ -374,6 +374,8 @@ fix, verify, prevent. See [troubleshooting/](troubleshooting/README.md).
 
 ## Screenshots
 
+**Demo video:** [demo/devoker-demo.mp4](demo/devoker-demo.mp4) (2 min 25 s). A real run from commit to live: the title changes to "Devoker v2", the pipeline goes green, images reach GHCR, the bot commits the new tag, Argo CD syncs, the pods roll, and the change is live.
+
 All in [`screenshots/`](screenshots/), grouped by rubric module.
 
 | Module | Screenshot |
