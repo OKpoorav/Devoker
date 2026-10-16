@@ -1,7 +1,7 @@
 backend:
   image:
     repository: ghcr.io/okpoorav/devoker-backend
-    tag: a8a0c5e63a23f94600a7b02d3faa67498c06fab5
+    tag: 0d059856e0e8758ae6eea08defbc03b66e836705
   replicas: 2 # safe: all game state is in Postgres, so any replica can serve any player
   resources:
     requests: {cpu: 50m, memory: 128Mi}
@@ -9,7 +9,7 @@ backend:
 frontend:
   image:
     repository: ghcr.io/okpoorav/devoker-frontend
-    tag: a8a0c5e63a23f94600a7b02d3faa67498c06fab5
+    tag: 0d059856e0e8758ae6eea08defbc03b66e836705
   resources:
     requests: {cpu: 20m, memory: 32Mi}
     limits: {cpu: 200m, memory: 128Mi}
