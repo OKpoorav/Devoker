@@ -374,22 +374,28 @@ fix, verify, prevent. See [troubleshooting/](troubleshooting/README.md).
 
 ## Screenshots
 
-To capture into `screenshots/`:
+All in [`screenshots/`](screenshots/), grouped by rubric module.
 
-- [ ] Two browser windows mid-hand on `devoker.localhost` (and on `localhost:3000` with compose)
-- [ ] `docker compose ps` with 3 services; `docker images` with both sizes
-- [ ] `pytest -v` passing
-- [ ] `kubectl get all,ingress,pvc,hpa,cm,secret -n devoker` with 2 backend and 2+ frontend pods Running
-- [ ] `helm list -n devoker` and `helm history devoker -n devoker`
-- [ ] Green pipeline; red pipeline from lodash 4.17.20
-- [ ] GHCR packages with SHA tags
-- [ ] Argo CD app tree, Synced / Healthy
-- [ ] Trivy output for both images
-- [ ] Prometheus *Status → Targets* with the backend targets UP
-- [ ] Grafana *Devoker* dashboard with live panels
-- [ ] Grafana CPU during the load test; `kubectl get hpa -w` scaling 2 → 5 → 2
-- [ ] Prometheus *Alerts* page showing the two Devoker rules
-- [ ] `terraform plan`, the EKS cluster and nodes in the AWS console, `kubectl get nodes`, `terraform destroy`
+| Module | Screenshot |
+|---|---|
+| M1 App | Two players mid-hand: [host](screenshots/02-app-player1-host.png), [second player](screenshots/02-app-player2.png) |
+| M2 Tests | [`pytest -v`, 34 passed](screenshots/03-pytest.png) |
+| M3 Repo | [Commit history](screenshots/04-commit-history.png) |
+| M4 Docker | [`docker compose up --build` and `ps` with 3 services](screenshots/01-docker-compose-up.png) |
+| M5 CI/CD | [Green pipeline run](screenshots/05-pipeline-green.png) ([run on GitHub](https://github.com/OKpoorav/Devoker/actions/runs/38800535473)), GHCR with SHA tags: [backend](screenshots/07-ghcr-backend.png), [frontend](screenshots/07-ghcr-frontend.png) |
+| M6 Trivy | Image gate in CI, 0 HIGH/CRITICAL: [backend](screenshots/06-trivy-backend.png), [frontend](screenshots/06-trivy-frontend.png) |
+| M7 Terraform | [`terraform plan`](screenshots/10-terraform-plan.png), [apply complete + `kubectl get nodes`](screenshots/14-terraform-apply-and-nodes.png), console: [EKS cluster](screenshots/15-aws-eks-cluster.png), [node group nodes](screenshots/16-aws-eks-nodegroup.png), [VPC](screenshots/17-aws-vpc.png), [2 public subnets](screenshots/18-aws-subnets.png), [`terraform destroy`](screenshots/20-terraform-destroy.png) |
+| M8 Kubernetes + Helm | [`kubectl get pods`](screenshots/08-kubectl-get-pods.png), [`kubectl get svc,ingress`](screenshots/08-kubectl-get-svc.png), [`helm upgrade --install` + `helm list`](screenshots/09-helm-list.png), [app through the Ingress](screenshots/08-app-via-ingress.png) |
+| M9 Monitoring | [`/metrics`](screenshots/11-metrics-endpoint.png), [Prometheus targets UP](screenshots/12-prometheus-targets.png), [Grafana Devoker dashboard](screenshots/13-grafana-dashboard.png) |
+| GitOps | [Argo CD app tree, Synced / Healthy](screenshots/19-argocd-synced.png) |
+
+Notes on how they were taken:
+- **AWS ran in `ap-southeast-2` (Sydney).** The lab account is on the AWS Free Plan, which only allows
+  that region, so Terraform ran from AWS CloudShell with `aws_region = "ap-southeast-2"` in `terraform.tfvars`.
+- **`helm list` shows the release in `devoker-staging`.** In the `devoker` namespace Argo CD renders
+  the chart itself (`helm template`), so no Helm release is recorded there. The same chart was
+  installed with `helm upgrade --install` into `devoker-staging` to show the Helm workflow.
+- Terminal screenshots are the real output of each command, rendered in a terminal-style page.
 
 ## Lessons learned
 
