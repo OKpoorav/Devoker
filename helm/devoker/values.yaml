@@ -33,7 +33,7 @@ game:
   bigBlind: 20
 ingress:
   enabled: true
-  host: devoker.local
+  host: devoker.localhost # browsers resolve *.localhost to 127.0.0.1, so no /etc/hosts entry is needed
 monitoring:
   # Needs the Prometheus Operator CRDs (kube-prometheus-stack). Turn off on a cluster without them.
   enabled: true

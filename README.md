@@ -38,7 +38,7 @@ and the frontend scales on CPU. Terraform can stand up the same stack's AWS side
 ```
 ┌──────────────────── Kubernetes (minikube) · namespace "devoker" ────────────────────┐
 │                                                                                     │
-│  browser ─► devoker.local ─► Ingress ─┬─ /     ─► Service frontend ─► nginx pods    │
+│  browser ─► devoker.localhost ─► Ingress ─┬─ /     ─► Service frontend ─► nginx pods    │
 │                                       │                               2..5, HPA     │
 │                                       └─ /api  ─► Service backend ─► FastAPI pods   │
 │                                                                       2 replicas    │
@@ -158,10 +158,10 @@ kubectl -n devoker create secret generic devoker-db --from-literal=password="$(o
 helm upgrade --install devoker helm/devoker -n devoker -f helm/values-local.yaml
 kubectl -n devoker get pods
 kubectl -n ingress-nginx port-forward svc/ingress-nginx-controller 8081:80 &
-python3 scripts/smoke.py http://localhost:8081 devoker.local
+python3 scripts/smoke.py http://localhost:8081 devoker.localhost
 ```
 
-To use a browser, add `127.0.0.1 devoker.local` to `/etc/hosts` and run `minikube tunnel`.
+Then open http://devoker.localhost:8081 in a browser. Browsers resolve any `*.localhost` name to 127.0.0.1, so no `/etc/hosts` entry is needed.
 
 | Object | Devoker's use |
 |---|---|
@@ -170,7 +170,7 @@ To use a browser, add `127.0.0.1 devoker.local` to `/etc/hosts` and run `minikub
 | Service ×3, all ClusterIP | `backend` (port 8000), `frontend` (8080), `postgres` (5432) |
 | ConfigMap | `STARTING_CHIPS`, `SMALL_BLIND`, `BIG_BLIND`, loaded with `envFrom` |
 | Secret | `devoker-db`, the Postgres password, created with kubectl and never committed |
-| Ingress | `devoker.local`: `/api` → backend, `/` → frontend, with SSE annotations |
+| Ingress | `devoker.localhost`: `/api` → backend, `/` → frontend, with SSE annotations |
 | HPA | frontend 2–5 replicas at 50% CPU |
 | PVC ×2 | Postgres data (1 Gi), nginx access log (1 Gi) |
 | Probes | backend readiness `/ready` (runs `SELECT 1`), liveness `/health`; frontend `/` |
@@ -376,7 +376,7 @@ fix, verify, prevent. See [troubleshooting/](troubleshooting/README.md).
 
 To capture into `screenshots/`:
 
-- [ ] Two browser windows mid-hand on `devoker.local` (and on `localhost:3000` with compose)
+- [ ] Two browser windows mid-hand on `devoker.localhost` (and on `localhost:3000` with compose)
 - [ ] `docker compose ps` with 3 services; `docker images` with both sizes
 - [ ] `pytest -v` passing
 - [ ] `kubectl get all,ingress,pvc,hpa,cm,secret -n devoker` with 2 backend and 2+ frontend pods Running
