@@ -54,7 +54,7 @@ function Lobby({ onJoin }) {
 
   return (
     <main className="lobby enter">
-      <h1>Devoker</h1>
+      <h1>Devoker v2</h1>
       <p className="tagline">Texas Hold'em with friends</p>
       <label>
         Your name
